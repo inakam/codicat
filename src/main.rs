@@ -1,6 +1,6 @@
+use anyhow::{Context, Result};
 use clap::Parser;
 use std::path::PathBuf;
-use anyhow::{Result, Context};
 
 mod cli;
 mod fileview;
@@ -55,5 +55,6 @@ fn main() -> Result<()> {
         args.copy,
         args.fzf,
         args.filter,
-    ).context("Failed to execute command")
+    )
+    .context("Failed to execute command")
 }

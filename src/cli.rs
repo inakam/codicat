@@ -1,4 +1,4 @@
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use arboard::Clipboard;
 use regex::Regex;
 use std::io::{self, Write};
@@ -30,7 +30,7 @@ impl App {
         filter_pattern: Option<String>,
     ) -> Result<()> {
         let mut output = Vec::new();
-        
+
         // ツリービューの表示
         if !no_tree {
             let mut writer = &mut output;
@@ -47,20 +47,20 @@ impl App {
 
         // ファイル一覧を取得して内容を表示
         let path = input_path.as_ref();
-        
+
         if path.is_file() {
             let mut writer = &mut output;
             fileview::file_view_with_lines(path, &mut writer, max_lines)?;
         } else {
             let files = self.list_git_files(path)?;
             let filtered_files = self.filter_files(files, filter_pattern)?;
-            
+
             let selected_files = if use_fzf && self.is_fzf_installed() {
                 self.select_files_with_fzf(&filtered_files)?
             } else {
                 filtered_files
             };
-            
+
             for file in selected_files {
                 let mut writer = &mut output;
                 fileview::file_view_with_lines(&file, &mut writer, max_lines)?;
@@ -78,12 +78,12 @@ impl App {
         let stdout = io::stdout();
         let mut stdout_handle = stdout.lock();
         stdout_handle.write_all(output)?;
-        
+
         // クリップボードにコピー
         if copy_to_clipboard {
             self.copy_to_clipboard(String::from_utf8_lossy(output).to_string())?;
         }
-        
+
         Ok(())
     }
 
@@ -98,7 +98,10 @@ impl App {
             }
             Err(err) => {
                 if err.to_string().contains("Not a Git repository") {
-                    anyhow::bail!("This directory is not inside a Git repository: {}", path.as_ref().display());
+                    anyhow::bail!(
+                        "This directory is not inside a Git repository: {}",
+                        path.as_ref().display()
+                    );
                 }
                 anyhow::bail!("Failed to list files: {}", err);
             }
@@ -109,14 +112,15 @@ impl App {
     fn filter_files(&self, files: Vec<PathBuf>, pattern: Option<String>) -> Result<Vec<PathBuf>> {
         if let Some(pattern) = pattern {
             let re = Regex::new(&pattern).context("Invalid regex pattern")?;
-            
-            let filtered = files.into_iter()
+
+            let filtered = files
+                .into_iter()
                 .filter(|f| {
                     let path_str = f.to_string_lossy();
                     re.is_match(&path_str)
                 })
                 .collect();
-            
+
             Ok(filtered)
         } else {
             Ok(files)
@@ -135,46 +139,49 @@ impl App {
 
     /// fzfを使ってファイルを選択する
     fn select_files_with_fzf(&self, files: &[PathBuf]) -> Result<Vec<PathBuf>> {
-        let input = files.iter()
+        let input = files
+            .iter()
             .map(|p| p.to_string_lossy().to_string())
             .collect::<Vec<_>>()
             .join("\n");
-        
+
         let mut child = Command::new("fzf")
             .arg("--multi")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()
             .context("Failed to spawn fzf")?;
-        
+
         {
             let stdin = child.stdin.as_mut().context("Failed to open stdin")?;
             stdin.write_all(input.as_bytes())?;
         }
-        
+
         let output = child.wait_with_output().context("Failed to wait for fzf")?;
-        
+
         if !output.status.success() {
             anyhow::bail!("fzf returned with non-zero status");
         }
-        
+
         let selection = String::from_utf8(output.stdout).context("Invalid UTF-8 in fzf output")?;
-        
+
         let selected_files = selection
             .lines()
             .filter(|line| !line.trim().is_empty())
-            .map(|line| PathBuf::from(line))
+            .map(PathBuf::from)
             .collect();
-        
+
         Ok(selected_files)
     }
 
     /// クリップボードにテキストをコピーする
     fn copy_to_clipboard(&self, text: String) -> Result<()> {
         let mut clipboard = Clipboard::new().context("Failed to access clipboard")?;
-        clipboard.set_text(text).context("Failed to copy to clipboard")?;
-        
+        clipboard
+            .set_text(text)
+            .context("Failed to copy to clipboard")?;
+
         eprintln!("✔️ Copied to clipboard.");
         Ok(())
     }
-} 
+}
