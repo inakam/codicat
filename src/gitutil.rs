@@ -28,8 +28,13 @@ pub fn get_git_root<P: AsRef<Path>>(path: P) -> Result<PathBuf> {
 
 /// 指定ディレクトリ以下のGit管理下のファイル一覧を取得する
 pub fn list_git_tracked_files<P: AsRef<Path>>(dir: P) -> Result<Vec<PathBuf>> {
+    // 最初にGitリポジトリのルートディレクトリを取得
+    let git_root = get_git_root(&dir)?;
+
+    // サブディレクトリからの実行でも全ファイルを取得するため、
+    // Gitリポジトリのルートディレクトリから実行する
     let output = Command::new("git")
-        .args(["-C", dir.as_ref().to_str().unwrap_or("."), "ls-files"])
+        .args(["-C", git_root.to_str().unwrap_or("."), "ls-files"])
         .output()
         .context("Failed to execute git command")?;
 
@@ -39,13 +44,11 @@ pub fn list_git_tracked_files<P: AsRef<Path>>(dir: P) -> Result<Vec<PathBuf>> {
 
     let content = String::from_utf8(output.stdout).context("Git output is not valid UTF-8")?;
 
+    // 各ファイルパスをGitリポジトリルートからの絶対パスに変換する
     let files = content
         .lines()
         .filter(|line| !line.trim().is_empty())
-        .map(|line| {
-            let path = dir.as_ref().join(line);
-            path
-        })
+        .map(|line| git_root.join(line))
         .collect();
 
     Ok(files)

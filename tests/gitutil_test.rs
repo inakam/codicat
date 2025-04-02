@@ -124,6 +124,21 @@ fn test_list_git_tracked_files_from_subdirectory() -> Result<()> {
     // 全ファイルがパス付きで取得できることを確認（サブディレクトリから実行しても）
     assert_eq!(files.len(), 3);
 
+    // 各ファイルのパスを確認
+    let file_names: Vec<_> = files
+        .iter()
+        .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
+        .collect();
+
+    assert!(file_names.contains(&"a.txt".to_string()));
+    assert!(file_names.contains(&"b.txt".to_string()));
+    assert!(file_names.contains(&"c.txt".to_string()));
+
+    // すべてのファイルが絶対パスで取得されていることを確認
+    for file in &files {
+        assert!(file.is_absolute());
+    }
+
     Ok(())
 }
 
