@@ -19,15 +19,15 @@ fn generate_testdata() -> Result<()> {
         "filter",
         "binary",
     ];
-    
+
     // Create directories for each test case
     for case in &test_cases {
         let case_dir = test_dir.join(case);
         fs::create_dir_all(&case_dir)?;
         fs::create_dir_all(case_dir.join("sub"))?;
-        
+
         println!("📁 Created: {}", case_dir.display());
-        
+
         // Create standard text files
         let files = vec![
             ("a.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
@@ -39,7 +39,7 @@ fn generate_testdata() -> Result<()> {
             let file_path = case_dir.join(path);
             fs::write(&file_path, content)?;
         }
-        
+
         // Only add files for filter case
         if *case == "filter" {
             fs::write(
@@ -55,7 +55,7 @@ fn generate_testdata() -> Result<()> {
                 "line 1\nline 2\nline 3\nline 4\nline 5\n",
             )?;
         }
-        
+
         // Only add binary file for binary case
         if *case == "binary" {
             let binary_file = case_dir.join("a.txt");
@@ -64,9 +64,9 @@ fn generate_testdata() -> Result<()> {
             file.write_all(b"\x00This is binary data")?;
         }
     }
-    
+
     println!("✅ Test data generation completed: {}", test_dir.display());
     println!("To generate golden files: cargo test -- --ignored generate_golden");
-    
+
     Ok(())
 }
