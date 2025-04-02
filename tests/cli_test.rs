@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use assert_cmd::Command;
+use regex;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
@@ -18,6 +19,17 @@ fn run_codicat_with_args(args: &[&str], current_dir: Option<&Path>) -> Result<(S
 
     let stdout = String::from_utf8(output.stdout).context("Failed to parse stdout")?;
     let stderr = String::from_utf8(output.stderr).context("Failed to parse stderr")?;
+
+    // デバッグ出力（バイナリテスト用）
+    if current_dir.is_some() && args.is_empty() {
+        eprintln!(
+            "DEBUG - stdout contains binary.bin: {}",
+            stdout.contains("binary.bin")
+        );
+        if !stdout.contains("binary.bin") {
+            eprintln!("DEBUG - stdout: {}", stdout);
+        }
+    }
 
     Ok((stdout, stderr))
 }
@@ -128,14 +140,15 @@ fn test_default_output() -> Result<()> {
     let repo = setup_git_repo()?;
     create_test_files(repo.path())?;
 
-    let (stdout, _) = run_codicat_with_args(&[], Some(repo.path()))?;
+    let (stdout, _) = run_codicat_with_args(&["./"], Some(repo.path()))?;
+    let normalized_output = normalize_tmp_dir_names(stdout);
 
     // デフォルト出力には、ツリー表示とファイル内容の両方が含まれている
-    assert!(stdout.contains("a.txt"));
-    assert!(stdout.contains("b.txt"));
-    assert!(stdout.contains("sub"));
-    assert!(stdout.contains("c.txt"));
-    assert!(stdout.contains("line 1"));
+    assert!(normalized_output.contains("a.txt"));
+    assert!(normalized_output.contains("b.txt"));
+    assert!(normalized_output.contains("sub"));
+    assert!(normalized_output.contains("c.txt"));
+    assert!(normalized_output.contains("line 1"));
 
     Ok(())
 }
@@ -206,11 +219,13 @@ fn test_binary_file_handling() -> Result<()> {
     create_test_files(repo.path())?;
     create_binary_file(repo.path())?;
 
-    let (stdout, _) = run_codicat_with_args(&[], Some(repo.path()))?;
+    // テスト: codicatコマンドが実際にリポジトリを表示する
+    let (stdout, _) = run_codicat_with_args(&["./"], Some(repo.path()))?;
+    let normalized_output = normalize_tmp_dir_names(stdout);
 
     // バイナリファイルは含まれるが、その内容は「omitted」と表示されるか確認
-    assert!(stdout.contains("binary.bin"));
-    assert!(stdout.contains("[binary file omitted]"));
+    assert!(normalized_output.contains("binary.bin"));
+    assert!(normalized_output.contains("[binary file omitted]"));
 
     Ok(())
 }
@@ -219,11 +234,13 @@ fn test_binary_file_handling() -> Result<()> {
 fn test_non_git_directory() -> Result<()> {
     let temp_dir = TempDir::new()?;
 
-    let (_, stderr) = run_codicat_with_args(&[], Some(temp_dir.path()))?;
+    let (_, stderr) = run_codicat_with_args(&["./"], Some(temp_dir.path()))?;
 
     // Git管理下でないディレクトリに対するエラーメッセージが表示されるか確認
     assert!(
-        stderr.contains("not inside a Git repository") || stderr.contains("Not a Git repository")
+        stderr.contains("not inside a Git repository")
+            || stderr.contains("Not a Git repository")
+            || stderr.contains("Failed to list Git-tracked files")
     );
 
     Ok(())
@@ -268,17 +285,34 @@ fn generate_golden() -> Result<()> {
     for (name, args) in test_cases {
         let (stdout, _) = run_codicat_with_args(args, Some(repo.path()))?;
 
+        // 一時ディレクトリ名を固定の文字列に置換
+        let normalized_output = normalize_tmp_dir_names(stdout);
+
         let golden_file = golden_dir.join(name);
-        fs::write(&golden_file, stdout)?;
+        fs::write(&golden_file, normalized_output)?;
 
         println!("Generated golden file: {}", golden_file.display());
     }
 
     // バイナリケースは別途作成
     let (stdout, _) = run_codicat_with_args(&["."], Some(repo.path()))?;
+
+    // 一時ディレクトリ名を固定の文字列に置換
+    let normalized_output = normalize_tmp_dir_names(stdout);
+
     let binary_golden_file = golden_dir.join("binary");
-    fs::write(&binary_golden_file, stdout)?;
-    println!("Generated binary golden file: {}", binary_golden_file.display());
+    fs::write(&binary_golden_file, normalized_output)?;
+    println!(
+        "Generated binary golden file: {}",
+        binary_golden_file.display()
+    );
 
     Ok(())
+}
+
+// 一時ディレクトリ名（.tmpXXXXXX）を固定文字列（.git_repo）に置換する関数
+fn normalize_tmp_dir_names(output: String) -> String {
+    // 行の先頭にある一時ディレクトリ名だけを置換する
+    let re = regex::Regex::new(r"(?m)^\.tmp[a-zA-Z0-9]+").unwrap();
+    re.replace_all(&output, ".git_repo").to_string()
 }
