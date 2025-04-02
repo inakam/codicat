@@ -43,6 +43,12 @@ Then you can run it:
 codicat --help
 ```
 
+## Example
+
+```sh
+codicat --max-lines 10 .
+```
+
 ## License
 
 MIT

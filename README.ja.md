@@ -43,6 +43,12 @@ cargo install --path .
 codicat --help
 ```
 
+## 使用例
+
+```sh
+codicat --max-lines 10 .
+```
+
 ## ライセンス
 
 MIT
