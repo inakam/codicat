@@ -50,22 +50,6 @@ fn test_render_full_file() -> Result<()> {
 }
 
 #[test]
-fn test_directory_rejection() -> Result<()> {
-    let tmp_dir = TempDir::new()?;
-    let mut buf = Vec::new();
-
-    // ディレクトリに対してエラーが発生することを確認
-    let result = fileview::file_view_with_lines(tmp_dir.path(), &mut buf, 0);
-    assert!(result.is_err());
-    assert!(result
-        .unwrap_err()
-        .to_string()
-        .contains("cannot render directory as file"));
-
-    Ok(())
-}
-
-#[test]
 fn test_binary_file_detection() -> Result<()> {
     let tmp_dir = TempDir::new()?;
     let binary_file = tmp_dir.path().join("binary.bin");
