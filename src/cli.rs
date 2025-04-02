@@ -12,6 +12,7 @@ use crate::treeview;
 /// アプリケーション構造体
 pub struct App;
 
+#[allow(clippy::too_many_arguments)]
 impl App {
     /// 新しいアプリケーションを作成する
     pub fn new() -> Self {
