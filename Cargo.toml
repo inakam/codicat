@@ -7,17 +7,14 @@ description = "Render directory tree and file contents from a Git repository"
 license = "MIT"
 
 [dependencies]
-clap = { version = "4.5.2", features = ["derive"] }
-anyhow = "1.0.79"
-thiserror = "1.0.57"
-walkdir = "2.4.0"
-arboard = "3.3.0"
-regex = "1.10.3"
+clap = { version = "4.5.35", features = ["derive"] }
+anyhow = "1.0.97"
+arboard = "3.4.1"
+regex = "1.11.1"
 
 [dev-dependencies]
-assert_cmd = "2.0.14"
-tempfile = "3.10.1"
-predicates = "3.1.0"
+assert_cmd = "2.0.16"
+tempfile = "3.19.1"
 
 [features]
 generate_testdata = []
