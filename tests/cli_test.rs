@@ -1,6 +1,5 @@
 use anyhow::{Context, Result};
 use assert_cmd::Command;
-use regex;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
