@@ -10,7 +10,7 @@ fn main() -> Result<()> {
 
 fn generate_testdata() -> Result<()> {
     let test_dir = Path::new("tests/testdata/input");
-    
+
     let test_cases = vec![
         "default",
         "max-lines",
@@ -19,27 +19,27 @@ fn generate_testdata() -> Result<()> {
         "filter",
         "binary",
     ];
-    
+
     // テストケースごとにディレクトリを作成
     for case in &test_cases {
         let case_dir = test_dir.join(case);
         fs::create_dir_all(&case_dir)?;
         fs::create_dir_all(case_dir.join("sub"))?;
-        
+
         println!("📁 作成: {}", case_dir.display());
-        
+
         // 標準テキストファイル作成
         let files = vec![
             ("a.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
             ("b.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
             ("sub/c.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
         ];
-        
+
         for (path, content) in &files {
             let file_path = case_dir.join(path);
             fs::write(&file_path, content)?;
         }
-        
+
         // filterケースのみ追加ファイル
         if *case == "filter" {
             fs::write(
@@ -55,7 +55,7 @@ fn generate_testdata() -> Result<()> {
                 "line 1\nline 2\nline 3\nline 4\nline 5\n",
             )?;
         }
-        
+
         // binaryケースのみバイナリファイル
         if *case == "binary" {
             let binary_file = case_dir.join("a.txt");
@@ -64,9 +64,12 @@ fn generate_testdata() -> Result<()> {
             file.write_all(b"\x00This is binary data")?;
         }
     }
-    
-    println!("✅ テストデータの生成が完了しました: {}", test_dir.display());
+
+    println!(
+        "✅ テストデータの生成が完了しました: {}",
+        test_dir.display()
+    );
     println!("ゴールデンファイルを生成するには: cargo test -- --ignored generate_golden");
-    
+
     Ok(())
-} 
+}

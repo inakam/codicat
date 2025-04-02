@@ -13,6 +13,12 @@ use crate::treeview;
 pub struct App;
 
 #[allow(clippy::too_many_arguments)]
+impl Default for App {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl App {
     /// 新しいアプリケーションを作成する
     pub fn new() -> Self {
