@@ -4,7 +4,7 @@ use std::io::Write;
 use std::path::Path;
 
 fn main() -> Result<()> {
-    println!("🔧 テストデータ生成を開始します...");
+    println!("🔧 Start test data generation...");
     generate_testdata()
 }
 
@@ -19,16 +19,16 @@ fn generate_testdata() -> Result<()> {
         "filter",
         "binary",
     ];
-
-    // テストケースごとにディレクトリを作成
+    
+    // Create directories for each test case
     for case in &test_cases {
         let case_dir = test_dir.join(case);
         fs::create_dir_all(&case_dir)?;
         fs::create_dir_all(case_dir.join("sub"))?;
-
-        println!("📁 作成: {}", case_dir.display());
-
-        // 標準テキストファイル作成
+        
+        println!("📁 Created: {}", case_dir.display());
+        
+        // Create standard text files
         let files = vec![
             ("a.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
             ("b.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
@@ -39,8 +39,8 @@ fn generate_testdata() -> Result<()> {
             let file_path = case_dir.join(path);
             fs::write(&file_path, content)?;
         }
-
-        // filterケースのみ追加ファイル
+        
+        // Only add files for filter case
         if *case == "filter" {
             fs::write(
                 case_dir.join("keep-me.txt"),
@@ -55,8 +55,8 @@ fn generate_testdata() -> Result<()> {
                 "line 1\nline 2\nline 3\nline 4\nline 5\n",
             )?;
         }
-
-        // binaryケースのみバイナリファイル
+        
+        // Only add binary file for binary case
         if *case == "binary" {
             let binary_file = case_dir.join("a.txt");
             let mut file = File::create(&binary_file)
@@ -64,12 +64,9 @@ fn generate_testdata() -> Result<()> {
             file.write_all(b"\x00This is binary data")?;
         }
     }
-
-    println!(
-        "✅ テストデータの生成が完了しました: {}",
-        test_dir.display()
-    );
-    println!("ゴールデンファイルを生成するには: cargo test -- --ignored generate_golden");
-
+    
+    println!("✅ Test data generation completed: {}", test_dir.display());
+    println!("To generate golden files: cargo test -- --ignored generate_golden");
+    
     Ok(())
 }
