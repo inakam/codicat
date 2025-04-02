@@ -253,12 +253,12 @@ fn generate_golden() -> Result<()> {
 
     // 各テストケースに対してゴールデンファイルを生成
     let test_cases = vec![
-        ("default", &[] as &[&str]),
+        ("default", &["."] as &[&str]),
         ("max-lines", &["--max-lines", "3"]),
         ("no-tree", &["--no-tree"]),
         ("no-content", &["--no-content"]),
         ("filter", &["--filter", "a\\.txt"]),
-        ("binary", &[]),
+        // バイナリテストケースもテキストケースと同じ方法で処理
     ];
 
     let repo = setup_git_repo()?;
@@ -273,6 +273,12 @@ fn generate_golden() -> Result<()> {
 
         println!("Generated golden file: {}", golden_file.display());
     }
+
+    // バイナリケースは別途作成
+    let (stdout, _) = run_codicat_with_args(&["."], Some(repo.path()))?;
+    let binary_golden_file = golden_dir.join("binary");
+    fs::write(&binary_golden_file, stdout)?;
+    println!("Generated binary golden file: {}", binary_golden_file.display());
 
     Ok(())
 }

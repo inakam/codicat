@@ -58,7 +58,7 @@ fn generate_testdata() -> Result<()> {
 
         // Only add binary file for binary case
         if *case == "binary" {
-            let binary_file = case_dir.join("a.txt");
+            let binary_file = case_dir.join("binary.bin");
             let mut file = File::create(&binary_file)
                 .with_context(|| format!("Failed to create file: {}", binary_file.display()))?;
             file.write_all(b"\x00This is binary data")?;

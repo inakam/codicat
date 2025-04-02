@@ -1,16 +1,44 @@
-Render directory tree and file contents from a Git repository
+.tmpoJCJT5
+├── a.txt
+├── b.txt
+├── binary.bin
+└── sub
+  └── c.txt
 
-Usage: codicat [OPTIONS] [PATH]
 
-Arguments:
-  [PATH]  Path to render (defaults to current directory) [default: .]
+/./a.txt
+--------------------------------------------------------------------------------
+   1 | line 1
+   2 | line 2
+   3 | line 3
+   4 | line 4
+   5 | line 5
 
-Options:
-      --max-lines <MAX_LINES>  Limit the number of lines printed per file [default: 500]
-      --no-tree                Do not render the tree view
-      --no-content             Do not render file contents
-      --copy                   Copy output to clipboard
-      --fzf                    Interactively select files via fzf (if installed)
-      --filter <FILTER>        Filter file paths with a regular expression
-  -h, --help                   Print help
-  -V, --version                Print version
+
+--------------------------------------------------------------------------------
+/./b.txt
+--------------------------------------------------------------------------------
+   1 | line 1
+   2 | line 2
+   3 | line 3
+   4 | line 4
+   5 | line 5
+
+
+--------------------------------------------------------------------------------
+/./binary.bin
+--------------------------------------------------------------------------------
+[binary file omitted]
+
+
+--------------------------------------------------------------------------------
+/./sub/c.txt
+--------------------------------------------------------------------------------
+   1 | line 1
+   2 | line 2
+   3 | line 3
+   4 | line 4
+   5 | line 5
+
+
+--------------------------------------------------------------------------------
