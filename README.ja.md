@@ -49,6 +49,61 @@ codicat --help
 codicat --max-lines 10 .
 ```
 
+## 開発
+
+### テスト
+
+すべてのテストを実行するには：
+
+```sh
+cargo test
+```
+
+#### テスト構造
+
+- **Unit Tests**: テストは各モジュール機能を個別に検証
+- **Integration Tests**: CLI ツール全体の動作を確認
+- **Golden Tests**: 期待される出力と実際の出力を比較
+
+#### テストデータの生成
+
+テストデータを生成するには：
+
+```sh
+cargo run --features=generate_testdata --bin generate_testdata
+```
+
+#### ゴールデンファイルの更新
+
+ゴールデンファイルを更新するには：
+
+```sh
+cargo test -- --ignored generate_golden
+```
+
+### CI/CD
+
+このプロジェクトは以下の GitHub Actions ワークフローを使用しています：
+
+#### CI (Continuous Integration)
+
+PR や main ブランチへのプッシュで自動的に実行されます：
+
+- コードフォーマットのチェック
+- Clippy Lint の実行
+- 全テストの実行
+- テストデータとゴールデンファイルの自動更新
+
+#### リリース
+
+タグをプッシュすると自動的にリリースが作成されます：
+
+- 次のプラットフォーム用のバイナリがビルドされます：
+  - Linux (x86_64, aarch64)
+  - macOS (x86_64, aarch64)
+  - Windows (x86_64)
+- リリースページへの自動アップロード
+
 ## ライセンス
 
 MIT
