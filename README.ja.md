@@ -49,6 +49,128 @@ codicat --help
 codicat --max-lines 10 .
 ```
 
+```
+codicat
+├── .github
+│ └── workflows
+│   ├── ci.yml
+│   ├── format.yml
+│   └── release.yml
+├── .gitignore
+├── Cargo.lock
+├── Cargo.toml
+├── README.ja.md
+├── README.md
+├── scripts
+│ ├── build.sh
+│ ├── package.sh
+│ └── release.sh
+├── src
+│ ├── bin
+│ │ └── generate_testdata.rs
+│ ├── cli.rs
+│ ├── fileview.rs
+│ ├── gitutil.rs
+│ ├── lib.rs
+│ ├── main.rs
+│ └── treeview.rs
+└── tests
+  ├── cli_test.rs
+  ├── fileview_test.rs
+  ├── gitutil_test.rs
+  ├── testdata
+  │ ├── README.md
+  │ ├── golden
+  │ │ ├── binary
+  │ │ ├── default
+  │ │ ├── filter
+  │ │ ├── max-lines
+  │ │ ├── no-content
+  │ │ └── no-tree
+  │ └── input
+  │   ├── binary
+  │   │ ├── a.txt
+  │   │ ├── b.txt
+  │   │ ├── binary.bin
+  │   │ └── sub
+  │   │   └── c.txt
+  │   ├── default
+  │   │ ├── a.txt
+  │   │ ├── b.txt
+  │   │ └── sub
+  │   │   └── c.txt
+  │   ├── filter
+  │   │ ├── a.txt
+  │   │ ├── b.txt
+  │   │ ├── keep-me.txt
+  │   │ ├── skip-me.txt
+  │   │ └── sub
+  │   │   ├── c.txt
+  │   │   └── keep-also.txt
+  │   ├── max-lines
+  │   │ ├── a.txt
+  │   │ ├── b.txt
+  │   │ └── sub
+  │   │   └── c.txt
+  │   ├── no-content
+  │   │ ├── a.txt
+  │   │ ├── b.txt
+  │   │ └── sub
+  │   │   └── c.txt
+  │   └── no-tree
+  │     ├── a.txt
+  │     ├── b.txt
+  │     └── sub
+  │       └── c.txt
+  └── treeview_test.rs
+
+
+/.github/workflows/ci.yml
+--------------------------------------------------------------------------------
+   1 | name: CI
+   2 |
+   3 | on:
+   4 |   push:
+   5 |     branches: [main]
+   6 |   pull_request:
+   7 |     branches: [main]
+   8 |
+   9 | env:
+  10 |   CARGO_TERM_COLOR: always
+
+
+--------------------------------------------------------------------------------
+/.github/workflows/format.yml
+--------------------------------------------------------------------------------
+   1 | name: Format Code
+   2 |
+   3 | on:
+   4 |   push:
+   5 |     branches: [main]
+   6 |   pull_request:
+   7 |     branches: [main]
+   8 |   workflow_dispatch:
+   9 |
+  10 | jobs:
+
+
+--------------------------------------------------------------------------------
+/.github/workflows/release.yml
+--------------------------------------------------------------------------------
+   1 | name: Release
+   2 |
+   3 | on:
+   4 |   push:
+   5 |     tags:
+   6 |       - "v*"
+   7 |
+   8 | jobs:
+   9 |   create-release:
+  10 |     runs-on: ubuntu-latest
+
+...
+```
+
 ## 開発
 
 ### テスト
