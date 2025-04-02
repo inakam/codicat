@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: リリース作成
+      - name: Create release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -48,43 +48,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Rustツールチェインセットアップ
-      - name: Rustツールチェインインストール
+      # Rust toolchain setup
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
 
-      # クロスコンパイル用のツール
-      - name: クロスコンパイル用ツールのインストール
+      # Install cross-compilation tools
+      - name: Install cross-compilation tools
         if: contains(matrix.target, 'aarch64') && contains(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
-      # ビルド
-      - name: ビルド
+      # Build
+      - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release --target ${{ matrix.target }}
           use-cross: ${{ contains(matrix.target, 'aarch64') && contains(matrix.os, 'ubuntu') }}
 
-      # 必要に応じたバイナリのコピー
-      - name: バイナリのリネーム (Unix)
+      # Copy binary (Unix)
+      - name: Rename binary (Unix)
         if: runner.os != 'Windows'
         run: |
           cp target/${{ matrix.target }}/release/codicat ${{ matrix.asset_name }}
           chmod +x ${{ matrix.asset_name }}
 
-      - name: バイナリのリネーム (Windows)
+      # Rename binary (Windows)
+      - name: Rename binary (Windows)
         if: runner.os == 'Windows'
         run: |
           copy target\${{ matrix.target }}\release\codicat.exe ${{ matrix.asset_name }}
 
-      # リリースのアップロード
-      - name: リリースアップロード
+      # Upload release
+      - name: Upload release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
