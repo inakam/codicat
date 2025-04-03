@@ -115,7 +115,7 @@ jobs:
         with:
           # Homebrewタップの設定
           homebrew_owner: inakam
-          homebrew_tap: homebrew-codicat
+          homebrew_tap: homebrew-tap
 
           # フォーミュラの保存先フォルダ
           formula_folder: Formula
