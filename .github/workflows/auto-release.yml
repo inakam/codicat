@@ -1,0 +1,48 @@
+name: Auto Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - master
+
+jobs:
+  create-release:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from branch name
+        id: extract_version
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          VERSION=${BRANCH_NAME#release/}
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "TAG_NAME=v${VERSION}" >> $GITHUB_ENV
+
+      - name: Create Release Tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag -a ${{ env.TAG_NAME }} -m "Release ${{ env.TAG_NAME }}"
+          git push origin ${{ env.TAG_NAME }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Release ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+          body: |
+            Release ${{ env.TAG_NAME }}
+
+            release branch `${{ github.event.pull_request.head.ref }}`
+            merged PR: #${{ github.event.pull_request.number }}
