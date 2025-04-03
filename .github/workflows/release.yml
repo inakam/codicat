@@ -111,7 +111,7 @@ jobs:
     name: Release to Homebrew
     steps:
       - name: Release project to Homebrew tap
-        uses: Justintime50/homebrew-releaser@v2
+        uses: Justintime50/homebrew-releaser@v2.0.1
         with:
           # Homebrewタップの設定
           homebrew_owner: inakam
