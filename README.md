@@ -1,6 +1,13 @@
 # codicat
 
 Display directory tree and file contents from Git repositories.
+Pass all code contents to LLM as prompts to understand the context.
+
+## Installation
+
+```sh
+brew install inakam/tap/codicat
+```
 
 ## Usage
 
@@ -13,7 +20,7 @@ Run `codicat --help` to see available options.
 ## Features
 
 - Display directory tree of Git-tracked files
-- Show file contents with line numbers (GitHub style)
+- Show file contents with line numbers (UitHub style)
   - Binary files are omitted by default
 
 ### Options
