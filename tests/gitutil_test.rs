@@ -171,3 +171,76 @@ fn test_empty_git_repo() -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn test_japanese_filename_handling() -> Result<()> {
+    let temp_dir = TempDir::new()?;
+
+    // Gitリポジトリを初期化
+    Command::new("git")
+        .args(["init"])
+        .current_dir(temp_dir.path())
+        .output()?;
+
+    // Gitユーザーを設定（コミットに必要）
+    Command::new("git")
+        .args(["config", "user.name", "Test User"])
+        .current_dir(temp_dir.path())
+        .output()?;
+
+    Command::new("git")
+        .args(["config", "user.email", "test@example.com"])
+        .current_dir(temp_dir.path())
+        .output()?;
+
+    // 日本語のファイル名を含むファイル構造を作成
+    let files = vec![
+        ("日本語ファイル.txt", "日本語コンテンツ"),
+        ("日本語フォルダ/中のファイル.txt", "ネストされたファイル"),
+    ];
+
+    for (path, content) in files {
+        let file_path = temp_dir.path().join(path);
+        if let Some(parent) = file_path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        let mut file = File::create(&file_path)?;
+        file.write_all(content.as_bytes())?;
+    }
+
+    // ファイルをGitに追加
+    Command::new("git")
+        .args(["add", "."])
+        .current_dir(temp_dir.path())
+        .output()?;
+
+    // コミット
+    Command::new("git")
+        .args(["commit", "-m", "Add Japanese files"])
+        .current_dir(temp_dir.path())
+        .output()?;
+
+    // Git管理下のファイル一覧を取得
+    let files = gitutil::list_git_tracked_files(temp_dir.path())?;
+
+    // 日本語ファイル名も含めて正しくファイルが取得できていることを確認
+    assert_eq!(files.len(), 2);
+
+    // 各ファイルの一部がPath内に含まれていることを確認
+    let file_names: Vec<String> = files
+        .iter()
+        .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
+        .collect();
+
+    assert!(file_names.iter().any(|name| name == "日本語ファイル.txt"));
+    assert!(file_names.iter().any(|name| name == "中のファイル.txt"));
+
+    // サブディレクトリからの実行テスト
+    let subdir = temp_dir.path().join("日本語フォルダ");
+    let subdir_files = gitutil::list_git_tracked_files(&subdir)?;
+
+    // 日本語サブディレクトリからでも全ファイルを取得できることを確認
+    assert_eq!(subdir_files.len(), 2);
+
+    Ok(())
+}

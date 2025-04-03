@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -34,7 +35,7 @@ pub fn list_git_tracked_files<P: AsRef<Path>>(dir: P) -> Result<Vec<PathBuf>> {
     // サブディレクトリからの実行でも全ファイルを取得するため、
     // Gitリポジトリのルートディレクトリから実行する
     let output = Command::new("git")
-        .args(["-C", git_root.to_str().unwrap_or("."), "ls-files"])
+        .args(["-C", git_root.to_str().unwrap_or("."), "ls-files", "-z"])
         .output()
         .context("Failed to execute git command")?;
 
@@ -42,14 +43,21 @@ pub fn list_git_tracked_files<P: AsRef<Path>>(dir: P) -> Result<Vec<PathBuf>> {
         anyhow::bail!("Failed to list Git-tracked files");
     }
 
-    let content = String::from_utf8(output.stdout).context("Git output is not valid UTF-8")?;
+    // -z オプションでNULL文字区切りの出力を取得し、バイナリデータとして処理
+    let mut files = Vec::new();
+    let mut start = 0;
 
-    // 各ファイルパスをGitリポジトリルートからの絶対パスに変換する
-    let files = content
-        .lines()
-        .filter(|line| !line.trim().is_empty())
-        .map(|line| git_root.join(line))
-        .collect();
+    for (i, &byte) in output.stdout.iter().enumerate() {
+        if byte == 0 {
+            if i > start {
+                let file_path = &output.stdout[start..i];
+                // git_rootとファイルパスを結合
+                let path = git_root.join(Path::new(std::ffi::OsStr::from_bytes(file_path)));
+                files.push(path);
+            }
+            start = i + 1;
+        }
+    }
 
     Ok(files)
 }

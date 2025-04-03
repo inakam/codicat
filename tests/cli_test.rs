@@ -260,6 +260,48 @@ fn test_file_specified() -> Result<()> {
     Ok(())
 }
 
+#[test]
+fn test_japanese_filename_handling() -> Result<()> {
+    let repo = setup_git_repo()?;
+    create_test_files(repo.path())?;
+    
+    // 日本語ファイルを作成
+    let japanese_file_path = repo.path().join("日本語ファイル.txt");
+    let mut file = File::create(&japanese_file_path)?;
+    file.write_all("日本語コンテンツ\n２行目の内容".as_bytes())?;
+    
+    // 日本語フォルダとファイルを作成
+    fs::create_dir_all(repo.path().join("日本語フォルダ"))?;
+    let japanese_nested_file_path = repo.path().join("日本語フォルダ/ネストされたファイル.txt");
+    let mut nested_file = File::create(&japanese_nested_file_path)?;
+    nested_file.write_all("ネストされた日本語ファイルの内容".as_bytes())?;
+    
+    // Gitに追加
+    Command::new("git")
+        .args(["add", "."])
+        .current_dir(repo.path())
+        .output()
+        .context("Failed to git add japanese files")?;
+        
+    // コミット
+    Command::new("git")
+        .args(["commit", "-m", "Add Japanese files"])
+        .current_dir(repo.path())
+        .output()
+        .context("Failed to commit japanese files")?;
+    
+    // 日本語ファイル名のフィルタリングテスト
+    let (stdout, _) = run_codicat_with_args(&["--filter", "日本語"], Some(repo.path()))?;
+    
+    // 日本語ファイル名とそのコンテンツが表示されていることを確認
+    assert!(stdout.contains("日本語ファイル.txt"));
+    assert!(stdout.contains("日本語コンテンツ"));
+    assert!(stdout.contains("日本語フォルダ"));
+    assert!(stdout.contains("ネストされたファイル.txt"));
+    
+    Ok(())
+}
+
 // ゴールデンファイルを生成するテスト（通常はignore）
 #[test]
 #[ignore]
@@ -280,6 +322,31 @@ fn generate_golden() -> Result<()> {
     let repo = setup_git_repo()?;
     create_test_files(repo.path())?;
     create_binary_file(repo.path())?;
+    
+    // 日本語ファイルを作成
+    let japanese_file_path = repo.path().join("日本語ファイル.txt");
+    let mut file = File::create(&japanese_file_path)?;
+    file.write_all("日本語コンテンツ\n２行目の内容".as_bytes())?;
+    
+    // 日本語フォルダとファイルを作成
+    fs::create_dir_all(repo.path().join("日本語フォルダ"))?;
+    let japanese_nested_file_path = repo.path().join("日本語フォルダ/ネストされたファイル.txt");
+    let mut nested_file = File::create(&japanese_nested_file_path)?;
+    nested_file.write_all("ネストされた日本語ファイルの内容".as_bytes())?;
+    
+    // Gitに追加
+    Command::new("git")
+        .args(["add", "."])
+        .current_dir(repo.path())
+        .output()
+        .context("Failed to git add japanese files")?;
+        
+    // コミット
+    Command::new("git")
+        .args(["commit", "-m", "Add Japanese files"])
+        .current_dir(repo.path())
+        .output()
+        .context("Failed to commit japanese files")?;
 
     for (name, args) in test_cases {
         let (stdout, _) = run_codicat_with_args(args, Some(repo.path()))?;
@@ -304,6 +371,16 @@ fn generate_golden() -> Result<()> {
     println!(
         "Generated binary golden file: {}",
         binary_golden_file.display()
+    );
+    
+    // 日本語ファイルのケースを追加
+    let (stdout, _) = run_codicat_with_args(&["--filter", "日本語"], Some(repo.path()))?;
+    let normalized_output = normalize_tmp_dir_names(stdout);
+    let japanese_golden_file = golden_dir.join("japanese");
+    fs::write(&japanese_golden_file, normalized_output)?;
+    println!(
+        "Generated Japanese golden file: {}",
+        japanese_golden_file.display()
     );
 
     Ok(())
