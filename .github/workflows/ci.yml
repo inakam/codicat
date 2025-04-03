@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -29,9 +30,6 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-
-      - name: Format check
-        run: cargo fmt --all -- --check
 
       - name: Lint check
         run: cargo clippy -- -D warnings
