@@ -1,6 +1,6 @@
 [package]
 name = "codicat"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["inakam"]
 description = "Render directory tree and file contents from a Git repository"
