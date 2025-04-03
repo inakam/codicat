@@ -1,8 +1,8 @@
 use anyhow::{Context, Result};
-#[cfg(unix)]
-use std::os::unix::ffi::OsStrExt;
 #[cfg(windows)]
 use std::ffi::OsString;
+#[cfg(unix)]
+use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -77,9 +77,9 @@ pub fn list_git_tracked_files<P: AsRef<Path>>(dir: P) -> Result<Vec<PathBuf>> {
     #[cfg(windows)]
     {
         // Windowsでは改行区切りの出力を処理
-        let output_str = String::from_utf8(output.stdout)
-            .context("Git output is not valid UTF-8")?;
-        
+        let output_str =
+            String::from_utf8(output.stdout).context("Git output is not valid UTF-8")?;
+
         let files = output_str
             .lines()
             .filter(|line| !line.is_empty())
@@ -89,7 +89,7 @@ pub fn list_git_tracked_files<P: AsRef<Path>>(dir: P) -> Result<Vec<PathBuf>> {
                 path
             })
             .collect();
-        
+
         Ok(files)
     }
 }
