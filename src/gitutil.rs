@@ -1,4 +1,7 @@
 use anyhow::{Context, Result};
+#[cfg(windows)]
+use std::ffi::OsString;
+#[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -34,8 +37,15 @@ pub fn list_git_tracked_files<P: AsRef<Path>>(dir: P) -> Result<Vec<PathBuf>> {
 
     // サブディレクトリからの実行でも全ファイルを取得するため、
     // Gitリポジトリのルートディレクトリから実行する
+    #[cfg(unix)]
     let output = Command::new("git")
         .args(["-C", git_root.to_str().unwrap_or("."), "ls-files", "-z"])
+        .output()
+        .context("Failed to execute git command")?;
+
+    #[cfg(windows)]
+    let output = Command::new("git")
+        .args(["-C", git_root.to_str().unwrap_or("."), "ls-files"])
         .output()
         .context("Failed to execute git command")?;
 
@@ -43,21 +53,43 @@ pub fn list_git_tracked_files<P: AsRef<Path>>(dir: P) -> Result<Vec<PathBuf>> {
         anyhow::bail!("Failed to list Git-tracked files");
     }
 
-    // -z オプションでNULL文字区切りの出力を取得し、バイナリデータとして処理
-    let mut files = Vec::new();
-    let mut start = 0;
+    #[cfg(unix)]
+    {
+        // -z オプションでNULL文字区切りの出力を取得し、バイナリデータとして処理
+        let mut files = Vec::new();
+        let mut start = 0;
 
-    for (i, &byte) in output.stdout.iter().enumerate() {
-        if byte == 0 {
-            if i > start {
-                let file_path = &output.stdout[start..i];
-                // git_rootとファイルパスを結合
-                let path = git_root.join(Path::new(std::ffi::OsStr::from_bytes(file_path)));
-                files.push(path);
+        for (i, &byte) in output.stdout.iter().enumerate() {
+            if byte == 0 {
+                if i > start {
+                    let file_path = &output.stdout[start..i];
+                    // git_rootとファイルパスを結合
+                    let path = git_root.join(Path::new(std::ffi::OsStr::from_bytes(file_path)));
+                    files.push(path);
+                }
+                start = i + 1;
             }
-            start = i + 1;
         }
+
+        Ok(files)
     }
 
-    Ok(files)
+    #[cfg(windows)]
+    {
+        // Windowsでは改行区切りの出力を処理
+        let output_str =
+            String::from_utf8(output.stdout).context("Git output is not valid UTF-8")?;
+
+        let files = output_str
+            .lines()
+            .filter(|line| !line.is_empty())
+            .map(|line| {
+                // パスを適切に結合
+                let path = git_root.join(line);
+                path
+            })
+            .collect();
+
+        Ok(files)
+    }
 }
