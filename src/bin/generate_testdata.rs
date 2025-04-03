@@ -18,6 +18,7 @@ fn generate_testdata() -> Result<()> {
         "no-content",
         "filter",
         "binary",
+        "japanese",
     ];
 
     // Create directories for each test case
@@ -64,6 +65,33 @@ fn generate_testdata() -> Result<()> {
             file.write_all(b"\x00This is binary data")?;
         }
     }
+
+    // 日本語ファイル名テストケース
+    println!("Generating Japanese filename test data...");
+    let japanese_dir = test_dir.join("japanese");
+    fs::create_dir_all(&japanese_dir)?;
+
+    // 基本ファイル作成（他のケースと同様）
+    let files = vec![
+        ("a.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
+        ("b.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
+        ("sub/c.txt", "line 1\nline 2\nline 3\nline 4\nline 5\n"),
+    ];
+
+    for (path, content) in &files {
+        let file_path = japanese_dir.join(path);
+        fs::write(&file_path, content)?;
+    }
+
+    // 日本語ファイル名のファイルを作成
+    let japanese_file = japanese_dir.join("日本語ファイル.txt");
+    fs::write(&japanese_file, "日本語コンテンツ\n２行目の内容")?;
+
+    // 日本語フォルダ名のディレクトリとファイルを作成
+    let japanese_subdir = japanese_dir.join("日本語フォルダ");
+    fs::create_dir_all(&japanese_subdir)?;
+    let nested_file = japanese_subdir.join("ネストされたファイル.txt");
+    fs::write(&nested_file, "ネストされた日本語ファイルの内容")?;
 
     println!("✅ Test data generation completed: {}", test_dir.display());
     println!("To generate golden files: cargo test -- --ignored generate_golden");

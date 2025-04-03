@@ -2,7 +2,10 @@
 ├── a.txt
 ├── b.txt
 ├── binary.bin
-└── sub
-  └── c.txt
+├── sub
+│ └── c.txt
+├── 日本語ファイル.txt
+└── 日本語フォルダ
+  └── ネストされたファイル.txt
 
 
