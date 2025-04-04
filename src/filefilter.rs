@@ -29,13 +29,11 @@ pub fn filter_generated_files(files: Vec<PathBuf>) -> Result<Vec<PathBuf>> {
 pub fn is_auto_generated(path: &Path) -> io::Result<bool> {
     if let Ok(file) = File::open(path) {
         let reader = BufReader::new(file);
-        for line_result in reader.lines().take(HEADER_CHECK_LINES) {
-            if let Ok(line) = line_result {
-                let lower_line = line.to_lowercase();
-                for keyword in HEADER_KEYWORDS.iter() {
-                    if lower_line.contains(keyword) {
-                        return Ok(true);
-                    }
+        for line in reader.lines().take(HEADER_CHECK_LINES).flatten() {
+            let lower_line = line.to_lowercase();
+            for keyword in HEADER_KEYWORDS.iter() {
+                if lower_line.contains(keyword) {
+                    return Ok(true);
                 }
             }
         }
