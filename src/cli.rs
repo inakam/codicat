@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use tiktoken_rs::cl100k_base;
 
+use crate::filefilter;
 use crate::fileview;
 use crate::gitutil;
 use crate::treeview;
@@ -37,6 +38,7 @@ impl App {
         use_fzf: bool,
         filter_pattern: Option<String>,
         show_token_count: bool,
+        exclude_generated: bool,
     ) -> Result<()> {
         let mut output = Vec::new();
 
@@ -64,10 +66,17 @@ impl App {
             let files = self.list_git_files(path)?;
             let filtered_files = self.filter_files(files, filter_pattern)?;
 
-            let selected_files = if use_fzf && self.is_fzf_installed() {
-                self.select_files_with_fzf(&filtered_files)?
+            // 自動生成ファイルを除外
+            let non_generated_files = if exclude_generated {
+                filefilter::filter_generated_files(filtered_files)?
             } else {
                 filtered_files
+            };
+
+            let selected_files = if use_fzf && self.is_fzf_installed() {
+                self.select_files_with_fzf(&non_generated_files)?
+            } else {
+                non_generated_files
             };
 
             for file in selected_files {

@@ -35,16 +35,17 @@ Run `codicat --help` to see available options.
 
 ### Options
 
-| Option          | Description                                       |
-| --------------- | ------------------------------------------------- |
-| `--max-lines`   | Limit the number of lines displayed per file      |
-| `--no-tree`     | Disable tree view                                 |
-| `--no-content`  | Disable file content display                      |
-| `--token-count` | Show token count                                  |
-| `--copy`        | Copy output to clipboard                          |
-| `--filter`      | Filter files based on regular expression patterns |
-| `--fzf`         | Interactively select files (requires fzf)         |
-| `--help`        | Show help                                         |
+| Option                | Description                                       |
+| --------------------- | ------------------------------------------------- |
+| `--max-lines`         | Limit the number of lines displayed per file      |
+| `--no-tree`           | Disable tree view                                 |
+| `--no-content`        | Disable file content display                      |
+| `--token-count`       | Show token count                                  |
+| `--copy`              | Copy output to clipboard                          |
+| `--filter`            | Filter files based on regular expression patterns |
+| `--fzf`               | Interactively select files (requires fzf)         |
+| `--exclude-generated` | Exclude auto-generated files by checking headers  |
+| `--help`              | Show help                                         |
 
 ## Example
 
