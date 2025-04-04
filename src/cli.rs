@@ -82,7 +82,12 @@ impl App {
     }
 
     /// 出力を標準出力とクリップボードに書き込む
-    fn finalize_output(&self, output: &[u8], copy_to_clipboard: bool, show_token_count: bool) -> Result<()> {
+    fn finalize_output(
+        &self,
+        output: &[u8],
+        copy_to_clipboard: bool,
+        show_token_count: bool,
+    ) -> Result<()> {
         if copy_to_clipboard {
             // クリップボードにコピー
             self.copy_to_clipboard(String::from_utf8_lossy(output).to_string())?;
