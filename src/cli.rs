@@ -36,6 +36,7 @@ impl App {
         copy_to_clipboard: bool,
         use_fzf: bool,
         filter_pattern: Option<String>,
+        show_token_count: bool,
     ) -> Result<()> {
         let mut output = Vec::new();
 
@@ -49,7 +50,7 @@ impl App {
 
         // ファイル内容を表示しない場合は終了
         if no_content {
-            self.finalize_output(&output, copy_to_clipboard)?;
+            self.finalize_output(&output, copy_to_clipboard, show_token_count)?;
             return Ok(());
         }
 
@@ -75,13 +76,13 @@ impl App {
             }
         }
 
-        self.finalize_output(&output, copy_to_clipboard)?;
+        self.finalize_output(&output, copy_to_clipboard, show_token_count)?;
 
         Ok(())
     }
 
     /// 出力を標準出力とクリップボードに書き込む
-    fn finalize_output(&self, output: &[u8], copy_to_clipboard: bool) -> Result<()> {
+    fn finalize_output(&self, output: &[u8], copy_to_clipboard: bool, show_token_count: bool) -> Result<()> {
         if copy_to_clipboard {
             // クリップボードにコピー
             self.copy_to_clipboard(String::from_utf8_lossy(output).to_string())?;
@@ -92,12 +93,11 @@ impl App {
             stdout_handle.write_all(output)?;
         }
 
-        // トークン数を計算
-        let output_text = String::from_utf8_lossy(output).to_string();
-        let token_count = self.count_tokens(&output_text)?;
-
-        // トークン数の情報を表示
-        println!("Token count: {}", token_count);
+        // トークン数情報の表示（オプションが有効な場合のみ）
+        if show_token_count {
+            let token_count = self.count_tokens(&String::from_utf8_lossy(output))?;
+            println!("Token count: {}", token_count);
+        }
 
         Ok(())
     }

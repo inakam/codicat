@@ -37,6 +37,10 @@ struct Args {
     /// Filter file paths with a regular expression
     #[arg(long)]
     filter: Option<String>,
+    
+    /// Display token count at the end of output
+    #[arg(long)]
+    token_count: bool,
 }
 
 fn main() -> Result<()> {
@@ -55,6 +59,7 @@ fn main() -> Result<()> {
         args.copy,
         args.fzf,
         args.filter,
+        args.token_count,
     )
     .context("Failed to execute command")
 }
