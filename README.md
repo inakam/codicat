@@ -5,8 +5,18 @@ Pass all code contents to LLM as prompts to understand the context.
 
 ## Installation
 
+Install using Homebrew:
+
 ```sh
 brew install inakam/tap/codicat
+```
+
+Download prebuilt binaries from the [Releases page](https://github.com/inakam/codicat/releases).
+
+Or, if you have Rust installed, you can build from source:
+
+```sh
+cargo install --path .
 ```
 
 ## Usage
@@ -33,22 +43,7 @@ Run `codicat --help` to see available options.
 | `--copy`       | Copy output to clipboard                          |
 | `--filter`     | Filter files based on regular expression patterns |
 | `--fzf`        | Interactively select files (requires fzf)         |
-
-## Installation
-
-Download prebuilt binaries from the [Releases page](https://github.com/inakam/codicat/releases).
-
-Or, if you have Rust installed, you can build from source:
-
-```sh
-cargo install --path .
-```
-
-Then you can run it:
-
-```sh
-codicat --help
-```
+| `--help`       | Show help                                         |
 
 ## Example
 
@@ -232,6 +227,7 @@ Automatically creates releases when a tag is pushed:
   - macOS (x86_64, aarch64)
   - Windows (x86_64)
 - Automatic upload to release page
+- Automatic upload to Homebrew repository
 
 ## License
 

@@ -5,8 +5,18 @@ LLM にコード内をすべてプロンプトとして渡すことで、コン�
 
 ## インストール
 
+Homebrew を利用したインストール:
+
 ```sh
 brew install inakam/tap/codicat
+```
+
+[リリースページ](https://github.com/inakam/codicat/releases)から事前ビルド済みバイナリをダウンロードすることもできます。
+
+あるいは、Rust がインストールされている場合はソースからビルドすることも可能です：
+
+```sh
+cargo install --path .
 ```
 
 ## 使い方
@@ -33,22 +43,7 @@ codicat [options] [path]
 | `--copy`       | 出力をクリップボードにコピー                       |
 | `--filter`     | 正規表現パターンに基づいてファイルをフィルタリング |
 | `--fzf`        | 対話的にファイルを選択（fzf のインストールが必要） |
-
-## インストール
-
-[リリースページ](https://github.com/inakam/codicat/releases)から事前ビルド済みバイナリをダウンロードしてください。
-
-あるいは、Rust がインストールされている場合はソースからビルドすることもできます：
-
-```sh
-cargo install --path .
-```
-
-その後、以下のように実行できます：
-
-```sh
-codicat --help
-```
+| `--help`       | ヘルプを表示                                       |
 
 ## 使用例
 
@@ -232,6 +227,7 @@ PR や main ブランチへのプッシュで自動的に実行されます：
   - macOS (x86_64, aarch64)
   - Windows (x86_64)
 - リリースページへの自動アップロード
+- Homebrew リポジトリへの自動アップロード
 
 ## ライセンス
 
