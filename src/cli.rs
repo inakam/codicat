@@ -81,14 +81,14 @@ impl App {
 
     /// 出力を標準出力とクリップボードに書き込む
     fn finalize_output(&self, output: &[u8], copy_to_clipboard: bool) -> Result<()> {
-        // 出力を標準出力にコピー
-        let stdout = io::stdout();
-        let mut stdout_handle = stdout.lock();
-        stdout_handle.write_all(output)?;
-
-        // クリップボードにコピー
         if copy_to_clipboard {
+            // クリップボードにコピー
             self.copy_to_clipboard(String::from_utf8_lossy(output).to_string())?;
+        } else {
+            // クリップボードにコピーしない場合は標準出力に表示
+            let stdout = io::stdout();
+            let mut stdout_handle = stdout.lock();
+            stdout_handle.write_all(output)?;
         }
 
         Ok(())
