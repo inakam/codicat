@@ -4,6 +4,7 @@ use regex::Regex;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use tiktoken_rs::cl100k_base;
 
 use crate::fileview;
 use crate::gitutil;
@@ -90,6 +91,13 @@ impl App {
             let mut stdout_handle = stdout.lock();
             stdout_handle.write_all(output)?;
         }
+
+        // トークン数を計算
+        let output_text = String::from_utf8_lossy(output).to_string();
+        let token_count = self.count_tokens(&output_text)?;
+
+        // トークン数の情報を表示
+        println!("Token count: {}", token_count);
 
         Ok(())
     }
@@ -190,5 +198,12 @@ impl App {
 
         eprintln!("✔️ Copied to clipboard.");
         Ok(())
+    }
+
+    /// テキストのトークン数を計算する
+    fn count_tokens(&self, text: &str) -> Result<usize> {
+        let bpe = cl100k_base().context("Failed to load cl100k_base encoding")?;
+        let tokens = bpe.encode_with_special_tokens(text);
+        Ok(tokens.len())
     }
 }
