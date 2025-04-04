@@ -4,6 +4,7 @@ use regex::Regex;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use tiktoken_rs::cl100k_base;
 
 use crate::fileview;
 use crate::gitutil;
@@ -35,6 +36,7 @@ impl App {
         copy_to_clipboard: bool,
         use_fzf: bool,
         filter_pattern: Option<String>,
+        show_token_count: bool,
     ) -> Result<()> {
         let mut output = Vec::new();
 
@@ -48,7 +50,7 @@ impl App {
 
         // ファイル内容を表示しない場合は終了
         if no_content {
-            self.finalize_output(&output, copy_to_clipboard)?;
+            self.finalize_output(&output, copy_to_clipboard, show_token_count)?;
             return Ok(());
         }
 
@@ -74,13 +76,18 @@ impl App {
             }
         }
 
-        self.finalize_output(&output, copy_to_clipboard)?;
+        self.finalize_output(&output, copy_to_clipboard, show_token_count)?;
 
         Ok(())
     }
 
     /// 出力を標準出力とクリップボードに書き込む
-    fn finalize_output(&self, output: &[u8], copy_to_clipboard: bool) -> Result<()> {
+    fn finalize_output(
+        &self,
+        output: &[u8],
+        copy_to_clipboard: bool,
+        show_token_count: bool,
+    ) -> Result<()> {
         if copy_to_clipboard {
             // クリップボードにコピー
             self.copy_to_clipboard(String::from_utf8_lossy(output).to_string())?;
@@ -89,6 +96,12 @@ impl App {
             let stdout = io::stdout();
             let mut stdout_handle = stdout.lock();
             stdout_handle.write_all(output)?;
+        }
+
+        // トークン数情報の表示（オプションが有効な場合のみ）
+        if show_token_count {
+            let token_count = self.count_tokens(&String::from_utf8_lossy(output))?;
+            println!("Token count: {}", token_count);
         }
 
         Ok(())
@@ -190,5 +203,12 @@ impl App {
 
         eprintln!("✔️ Copied to clipboard.");
         Ok(())
+    }
+
+    /// テキストのトークン数を計算する
+    fn count_tokens(&self, text: &str) -> Result<usize> {
+        let bpe = cl100k_base().context("Failed to load cl100k_base encoding")?;
+        let tokens = bpe.encode_with_special_tokens(text);
+        Ok(tokens.len())
     }
 }
