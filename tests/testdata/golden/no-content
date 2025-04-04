@@ -2,6 +2,7 @@
 ├── a.txt
 ├── b.txt
 ├── binary.bin
+├── generated.rs
 ├── sub
 │ └── c.txt
 ├── 日本語ファイル.txt
@@ -9,4 +10,3 @@
   └── ネストされたファイル.txt
 
 
-Token count: 78
