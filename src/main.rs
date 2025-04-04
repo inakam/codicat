@@ -3,6 +3,7 @@ use clap::Parser;
 use std::path::PathBuf;
 
 mod cli;
+mod filefilter;
 mod fileview;
 mod gitutil;
 mod treeview;
@@ -41,6 +42,10 @@ struct Args {
     /// Display token count at the end of output
     #[arg(long)]
     token_count: bool,
+
+    /// Exclude auto-generated files by checking header comments
+    #[arg(long)]
+    exclude_generated: bool,
 }
 
 fn main() -> Result<()> {
@@ -60,6 +65,7 @@ fn main() -> Result<()> {
         args.fzf,
         args.filter,
         args.token_count,
+        args.exclude_generated,
     )
     .context("Failed to execute command")
 }
